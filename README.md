@@ -23,26 +23,25 @@ error mentioned in the tweet below on the first version. The software on the
 AVR board is written in C and is to be uploaded with the Arduino environment
 using [MegaCore](https://github.com/MCUdude/MegaCore).
 
-<blockquote class="twitter-tweet"><p lang="en" dir="ltr">I&#39;m working on a
+>I'm working on a
 flash burner shield and software for the common ATmega128 breakout board. It
 will support the common parallel 32-pin flash DIP pinout for e.g. SST39SF010A
 or Am29F010B families (including the larger chips). Just using it as a learning
-experience. <a
-href="https://t.co/QUT4oCoo5p">pic.twitter.com/QUT4oCoo5p</a></p>&mdash; Karl
-Matthias (@relistan) <a
-href="https://twitter.com/relistan/status/1282256215960096775?ref_src=twsrc%5Etfw">July
-12, 2020</a></blockquote>
+experience. [pic.twitter.com/QUT4oCoo5p](https://t.co/QUT4oCoo5p) &mdash;
+Karl Matthias (@relistan) [July 12,
+2020]("https://twitter.com/relistan/status/1282256215960096775?ref_src=twsrc%5Etfw")
+
 ![Flash Gordon1](./images/image1.png)
 
-<blockquote class="twitter-tweet"><p lang="en" dir="ltr">It works! Software I
+>It works! Software I
 wrote for the breadboard version just worked. 😁Two little h/w mistakes but
 probably not going to worry about it. You can see the bodge wire and cut trace.
 Also not quite enough clearance for the power jack on the AVR board so I
-removed it (don&#39;t need it). <a
-href="https://t.co/LKhlerHqjA">pic.twitter.com/LKhlerHqjA</a></p>&mdash; Karl
-Matthias (@relistan) <a
-href="https://twitter.com/relistan/status/1287041625605185538?ref_src=twsrc%5Etfw">July
-25, 2020</a></blockquote>
+removed it (don't need it).
+[pic.twitter.com/LKhlerHqjA](https://t.co/LKhlerHqjA)&mdash; Karl Matthias
+(@relistan) [July 25,
+2020]("https://twitter.com/relistan/status/1287041625605185538?ref_src=twsrc%5Etfw")
+
 ![Flash Gordon2](./images/image2.png)
 
 Platforms Supported
