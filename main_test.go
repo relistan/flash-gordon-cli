@@ -53,6 +53,10 @@ func Test_AllMethods(t *testing.T) {
 			So(logCapture.String(), ShouldNotContainSubstring, "error")
 		})
 
+		SkipConvey("uploadFile() handles addresses larger than 16bits", func() {
+			// TODO
+		})
+
 		Convey("eraseFlash() sends the correct command and waits for reply", func() {
 			eraseFlash(port)
 			So(outputBuf.Bytes()[0:2], ShouldResemble, []byte("\ne"))
