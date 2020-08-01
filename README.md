@@ -32,7 +32,7 @@ href="https://t.co/QUT4oCoo5p">pic.twitter.com/QUT4oCoo5p</a></p>&mdash; Karl
 Matthias (@relistan) <a
 href="https://twitter.com/relistan/status/1282256215960096775?ref_src=twsrc%5Etfw">July
 12, 2020</a></blockquote>
-![Flash Gordon1](images/image1.png)
+![Flash Gordon1](./images/image1.png)
 
 <blockquote class="twitter-tweet"><p lang="en" dir="ltr">It works! Software I
 wrote for the breadboard version just worked. 😁Two little h/w mistakes but
@@ -43,7 +43,7 @@ href="https://t.co/LKhlerHqjA">pic.twitter.com/LKhlerHqjA</a></p>&mdash; Karl
 Matthias (@relistan) <a
 href="https://twitter.com/relistan/status/1287041625605185538?ref_src=twsrc%5Etfw">July
 25, 2020</a></blockquote>
-![Flash Gordon2](images/image2.png)
+![Flash Gordon2](./images/image2.png)
 
 Platforms Supported
 -------------------
