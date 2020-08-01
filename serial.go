@@ -59,7 +59,7 @@ func readAllData(port *IOWrapper) {
 
 	for {
 		n, err := port.Read(buf)
-		if err != nil {
+		if err != nil && err != io.EOF {
 			log.Errorf("Error reading from serial port: %s", err)
 			break
 		}
