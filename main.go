@@ -9,6 +9,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var (
+	// twoToThe16th is used in checking address lengths
+	twoToThe16th = 65536
+)
+
 // uploadFile uploads a file by encoding it as an Intel hex file and streaming
 // it over the serial port as it goes.
 func uploadFile(port *IOWrapper, config *Config, file io.Reader) error {

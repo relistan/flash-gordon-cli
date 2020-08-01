@@ -11,11 +11,6 @@ const (
 	BytesPerLine = 32
 )
 
-var (
-	// twoToThe16th is used in checking address lengths
-	twoToThe16th = 65536
-)
-
 // checksumFor calculates the checksum byte for the byteslice we pass in
 func checksumFor(record []byte) byte {
 	var sum byte
