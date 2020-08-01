@@ -3,12 +3,56 @@ Flash Gordon CLI
 
 This is the command line tool for interacting with the Flash Gordon flash
 burner that I built. It interacts with the board over serial and can upload,
-dump, chip erase, and sector erase parallel flash chips such as:
+dump, chip erase, and sector erase 32-pin parallel flash chips such as:
 
  * SST39SF010A
  * SST39SF020A
  * SST39SF040
+ * Am29F010B
+ * Am29F020B
+ * Am29F040B
  * ... other chips with the same, common pinout
+
+The Problem This Solves
+-----------------------
+
+I wanted a cheap flash burner that would be useful for writing to common
+parallel flash chips for experimenting with old 8-bit CPUs. I wanted it to have
+CLI software that runs on macOS easily. I had a couple of ATmega128a boards
+around this chip has enough IO ports to support the 32-pin flash chips easily.
+
+Usage
+-----
+```
+usage: flash-gordon-cli [<flags>] <command> [<args> ...]
+
+Flags:
+  --help             Show context-sensitive help (also try --help-long and
+                     --help-man).
+  --serial-port="/dev/cu.usbserial-FTDOMLSO"  
+                     The Serial port name/path to use
+  --baud-rate=57600  The baud rate of the serial port
+  --use-serial       Serial or stdout?
+
+Commands:
+  help [<command>...]
+    Show help.
+
+  upload [<flags>] [<input-file>]
+    Upload a file to Flash Gordon
+
+  dump
+    Dump the contents of the flash chip
+
+  erase [<flags>]
+    Erase the contents of the whole flash chip
+```
+
+The tool currently supports the above commands and a serial port, to be named
+as a CLI arg. It defaults to the common location on macOS for an FTDI cable.
+You will need to set this to the correct address path for your host. You can
+find this in the Arduino console if you don't know how to find it on the
+command line.
 
 Hardware
 --------
