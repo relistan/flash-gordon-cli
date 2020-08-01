@@ -54,6 +54,14 @@ You will need to set this to the correct address path for your host. You can
 find this in the Arduino console if you don't know how to find it on the
 command line.
 
+**Note** that currently `upload` will *do the Intel Hex encoding on the fly* so
+you can simply supply the binary in the endianness you want it to have when
+written into the chip. The software will encode it and upload it to the board.
+
+I will likely add an `uploadRaw` option to use pre-encoded Intel Hex format
+files. This will then better support assemblers and other tools whose native
+output format is Intel Hex (e.g Avra assembler).
+
 Hardware
 --------
 
