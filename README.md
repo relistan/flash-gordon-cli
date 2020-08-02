@@ -13,6 +13,9 @@ dump, chip erase, and sector erase 32-pin parallel flash chips such as:
  * Am29F040B
  * ... other chips with the same, common pinout
 
+You [can find the software for the hardwire side
+here](https://github.com/relistan/flash-gordon-mcu).
+
 The Problem This Solves
 -----------------------
 
