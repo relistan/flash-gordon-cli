@@ -22,7 +22,8 @@ The Problem This Solves
 I wanted a cheap flash burner that would be useful for writing to common
 parallel flash chips for experimenting with old 8-bit CPUs. I wanted it to have
 CLI software that runs on macOS easily. I had a couple of ATmega128a boards
-around this chip has enough IO ports to support the 32-pin flash chips easily.
+around, and  this chip has enough IO ports to support the 32-pin flash chips
+easily.
 
 Usage
 -----
