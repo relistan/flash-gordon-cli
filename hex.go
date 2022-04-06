@@ -9,6 +9,11 @@ const (
 	// BytesPerLine is the number of binary bytes we'll encode per line of the
 	// hex file.
 	BytesPerLine = 32
+
+	RecTypeData    = 0 // normal data record
+	RecTypeEOF     = 1 // end-of-file record
+	RecTypeExtSeg  = 2 // extended segment address record
+	RecTypeExtAddr = 4 // extended linear address record (for 32bit records)
 )
 
 // checksumFor calculates the checksum byte for the byteslice we pass in
@@ -33,3 +38,6 @@ func formatRecord(addr int, recType byte, rec []byte) string {
 
 	return fmt.Sprintf(":%02X%02X", allBytes, checkSum)
 }
+
+// Ruby implementation of checksum, for validation:
+/// (([the_hex_str].pack('H*').each_byte.inject(0) { |memo, x| memo = (memo & 0xFF) + x } ^ 0xFF) + 1).to_s(16)

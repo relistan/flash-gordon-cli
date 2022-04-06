@@ -5,18 +5,29 @@ import (
 	"os"
 
 	log "github.com/sirupsen/logrus"
-	"go.bug.st/serial.v1"
+	"go.bug.st/serial"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 type Config struct {
-	BaseAddr   *int
-	InputFile  *string
-	SerialPort *string
-	BaudRate   *int
-	UseSerial  *bool
-	Sector     *int
-	Command    string
+	SerialPort  *string
+	BaudRate    *int
+	UseSerial   *bool
+	BaseAddr    *int
+	Flash32Pin  *bool
+	EEPROM28Pin *bool
+
+	Command string
+
+	// Upload
+	InputFile *string
+
+	// Dump
+	OutputFile *string
+	Length     *int
+
+	// Erase
+	Sector *int
 }
 
 // parseConfig parse the command line using Kingpin and returns a Config
@@ -24,20 +35,36 @@ type Config struct {
 func parseConfig() *Config {
 	uploadCommand := kingpin.Command("upload", "Upload a file to Flash Gordon")
 	dumpCommand := kingpin.Command("dump", "Dump the contents of the flash chip")
-	eraseCommand := kingpin.Command("erase", "Erase the contents of the whole flash chip")
+	eraseCommand := kingpin.Command("erase", "Erase the whole flash chip contents")
 
 	config := &Config{
-		SerialPort: kingpin.Flag("serial-port", "The Serial port name/path to use").Default("/dev/cu.usbserial-FTDOMLSO").String(),
-		BaudRate:   kingpin.Flag("baud-rate", "The baud rate of the serial port").Default("57600").Int(),
-		UseSerial:  kingpin.Flag("use-serial", "Serial or stdout?").Default("true").Bool(),
+		SerialPort:  kingpin.Flag("serial-port", "The Serial port name/path to use").Default("/dev/cu.usbserial-FTDOMLSO").String(),
+		BaudRate:    kingpin.Flag("baud-rate", "The baud rate of the serial port").Default("57600").Int(),
+		UseSerial:   kingpin.Flag("use-serial", "Serial or stdout?").Default("true").Bool(),
+		Flash32Pin:  kingpin.Flag("32pin-flash", "Is this a 32 pin flash chip?").Bool(),
+		EEPROM28Pin: kingpin.Flag("28pin-eeprom", "Is this a 28 pin EEPROM?").Bool(),
+		BaseAddr:    kingpin.Flag("base-addr", "Base Address to use as starting address").Default("0").Int(),
 
-		InputFile: uploadCommand.Arg("input-file", "The file to take input from").String(),
-		BaseAddr:  uploadCommand.Flag("base-addr", "Base Address to use as starting address").Default("0").Int(),
+		// UPLOAD
+		InputFile: uploadCommand.Arg("input-file", "The file to take input from").Required().String(),
 
+		// DUMP
+		OutputFile: dumpCommand.Arg("output-file", "The file to write to locally").Required().String(),
+		Length:     dumpCommand.Flag("length", "The number of bytes to dump").Default("1024").Int(),
+
+		// ERASE
 		Sector: eraseCommand.Flag("sector", "The number of the sector to erase").Int(),
 	}
 
-	switch kingpin.Parse() {
+	command := kingpin.Parse()
+
+	if *config.EEPROM28Pin && *config.Flash32Pin {
+		log.Fatal("Must choose either a flash chip or an EEPROM, not both")
+	} else if !*config.EEPROM28Pin && !*config.Flash32Pin {
+		log.Fatal("Must choose at least one of: 32pin-flash or 28pin-eeprom")
+	}
+
+	switch command {
 	case uploadCommand.FullCommand():
 		config.Command = "upload"
 	case dumpCommand.FullCommand():

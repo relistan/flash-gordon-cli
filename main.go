@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"os"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -30,11 +31,26 @@ func uploadFile(port *IOWrapper, config *Config, file io.Reader) error {
 
 	// Begin the upload
 	port.Write([]byte("u"))
-	serialReadOutput(port)
+
+	// Tell it what kind of chip we're using
+	if *config.Flash32Pin {
+		port.Write([]byte("f"))
+	} else if *config.EEPROM28Pin {
+		port.Write([]byte("e"))
+	}
+
+	out, err := serialReadOutput(port)
+	if err != nil {
+		return err
+	}
+	println(out)
 
 	// Starting address record
-	serialWriteLn(port, formatRecord(0x0, 0x04, []byte{0x0, 0x0}), 10*time.Millisecond)
-	if err := serialReadOutput(port); err != nil {
+	serialWriteLn(port,
+		formatRecord(0x0, RecTypeExtAddr, []byte{0x0, 0x0}),
+		10*time.Millisecond,
+	)
+	if _, err := serialReadOutput(port); err != nil {
 		return err
 	}
 
@@ -47,7 +63,10 @@ func uploadFile(port *IOWrapper, config *Config, file io.Reader) error {
 			return fmt.Errorf("Error on read: %s", err)
 		}
 
-		serialWriteLn(port, formatRecord(addr, 0x0, buf[:readLen]), 10*time.Millisecond)
+		serialWriteLn(port,
+			formatRecord(addr, RecTypeData, buf[:readLen]),
+			10*time.Millisecond,
+		)
 		addr += readLen
 
 		// Handle more than 16 bits by emitting a new segment record when
@@ -60,36 +79,53 @@ func uploadFile(port *IOWrapper, config *Config, file io.Reader) error {
 			binary.BigEndian.PutUint16(segmentBytes, uint16(segment))
 			serialWriteLn(port, formatRecord(0x00, 0x02, segmentBytes), 10*time.Millisecond)
 		}
-		if err := serialReadOutput(port); err != nil {
+		out, err := serialReadOutput(port)
+		if err != nil {
 			return err
 		}
+		println(out)
 	}
 
 	// EOF Record
 	serialWriteLn(port, ":00000001FF\n", 10*time.Millisecond)
 	log.Infof("Completed sending: %d bytes", addr)
-	if err := serialReadOutput(port); err != nil {
+	out, err = serialReadOutput(port)
+	if err != nil {
 		log.Error(err)
 		return err
 	}
-	if err := serialReadOutput(port); err != nil {
+	println(out)
+
+	out, err = serialReadOutput(port)
+	if err != nil {
 		return err
 	}
+	println(out)
 	readAllData(port)
 
 	return nil
 }
 
-// dumpFile dumps the contents of the Flash to the terminal in a human readable format,
-// starting from 0 and running to the end of the Flash.
-func dumpFlash(port *IOWrapper) {
+// dumpFlash dumps the contents of the Flash to the terminal in a human
+// readable format, starting from `start` and running to the end of the Flash.
+func dumpFlash(port *IOWrapper, config *Config) {
 	readAllData(port)
 
-	log.Info("Dumping Flash contents")
+	log.Infof(
+		"Dumping %d bytes from Flash contents starting from %d",
+		*config.Length, *config.BaseAddr,
+	)
 
-	// Begin the upload
-	port.Write([]byte("d"))
-	readAllData(port)
+	outFile, err := os.OpenFile(*config.OutputFile, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		log.Fatalf("Unable to create output file! '%s'", err)
+	}
+
+	// Begin the dump - command is 'd' plus 32bit hex base and length
+	addrStr := fmt.Sprintf("d%08X%08X", *config.BaseAddr, *config.Length)
+	log.Infof("AddrStr: %s", addrStr)
+	port.Write([]byte(addrStr))
+	readAllDataToWriter(port, outFile)
 
 	log.Info("Completed dump")
 }
@@ -99,7 +135,7 @@ func eraseFlash(port *IOWrapper) {
 
 	log.Info("Performing chip erase")
 
-	// Begin the upload
+	// Begin the erase
 	port.Write([]byte("e"))
 	readAllData(port)
 
@@ -129,7 +165,7 @@ func main() {
 			log.Error(err.Error())
 		}
 	case "dump":
-		dumpFlash(port)
+		dumpFlash(port, config)
 	case "erase":
 		eraseFlash(port)
 	}

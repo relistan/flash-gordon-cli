@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 	"time"
 
@@ -49,9 +50,15 @@ func serialWriteLn(port io.ReadWriter, data string, delay time.Duration) {
 	time.Sleep(delay)
 }
 
-// readAllData loops through anything pending in the serial buffer at
-// startup time.
+// readAllData loops through anything pending in the serial buffer and prints
+// it.
 func readAllData(port *IOWrapper) {
+	readAllDataToWriter(port, os.Stdout)
+}
+
+// readAllDataToIO loops through anything in the serial buffer and writes it
+// out to a file.
+func readAllDataToWriter(port *IOWrapper, out io.Writer) {
 	buf := make([]byte, BytesPerLine)
 
 	// Trigger at least _some_ output even if it's just sitting at the prompt
@@ -68,19 +75,20 @@ func readAllData(port *IOWrapper) {
 			break
 		}
 
-		if strings.Contains(string(buf[:n]), "Command") {
+		if pos := strings.Index(string(buf[:n]), "Enter Command"); pos != -1 {
+			fmt.Fprint(out, string(buf[:pos-1]))
 			break
 		}
-		fmt.Print(string(buf[:n]))
+		fmt.Fprint(out, string(buf[:n]))
+		time.Sleep(6 * time.Millisecond)
 	}
 }
 
-func serialReadOutput(port *IOWrapper) error {
+func serialReadOutput(port *IOWrapper) (string, error) {
 	data, _, _ := port.ReadLine()
 	if strings.Contains(string(data), "ERROR") {
-		return fmt.Errorf("%s", data)
+		return string(data), fmt.Errorf("%s", data)
 	}
 
-	fmt.Println(string(data))
-	return nil
+	return string(data), nil
 }
