@@ -36,7 +36,6 @@ func Test_AllMethods(t *testing.T) {
 			Output: outputBuf,
 		}
 
-
 		Convey("uploadFile() sends the correct data after receiving 'Enter Command'", func() {
 			zero := 0
 			config := &Config{
@@ -66,7 +65,7 @@ func Test_AllMethods(t *testing.T) {
 		})
 
 		Convey("eraseFlashSector() sends the correct command and waits for reply", func() {
-			five := 5;
+			five := 5
 			config := &Config{
 				Sector: &five,
 			}
@@ -80,4 +79,3 @@ func Test_AllMethods(t *testing.T) {
 		})
 	})
 }
-

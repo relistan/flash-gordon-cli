@@ -161,8 +161,6 @@ func main() {
 	port := configureSerial(config)
 	logConfig(config)
 
-	readAllData(port)
-
 	switch config.Command {
 	case "upload":
 		err := uploadFile(port, config, file)

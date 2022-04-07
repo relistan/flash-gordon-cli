@@ -57,7 +57,7 @@ func readAllData(port *IOWrapper) {
 	readAllDataToWriter(port, os.Stdout)
 }
 
-// readAllDataToIO loops through anything in the serial buffer and writes it
+// readAllDataToWriter loops through anything in the serial buffer and writes it
 // out to a file.
 func readAllDataToWriter(port *IOWrapper, out io.Writer) {
 	buf := make([]byte, BytesPerLine)
