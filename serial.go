@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -75,11 +76,11 @@ func readAllDataToWriter(port *IOWrapper, out io.Writer) {
 			break
 		}
 
-		if pos := strings.Index(string(buf[:n]), "Enter Command"); pos != -1 {
-			fmt.Fprint(out, string(buf[:pos-1]))
+		if pos := bytes.Index(buf[:n], []byte("Enter Command")); pos != -1 {
+			out.Write(buf[:pos])
 			break
 		}
-		fmt.Fprint(out, string(buf[:n]))
+		out.Write(buf[:n])
 		time.Sleep(6 * time.Millisecond)
 	}
 }

@@ -116,7 +116,9 @@ func dumpFlash(port *IOWrapper, config *Config) {
 		*config.Length, *config.BaseAddr,
 	)
 
-	outFile, err := os.OpenFile(*config.OutputFile, os.O_RDWR|os.O_CREATE, 0644)
+	outFile, err := os.OpenFile(
+		*config.OutputFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644,
+	)
 	if err != nil {
 		log.Fatalf("Unable to create output file! '%s'", err)
 	}
@@ -126,6 +128,7 @@ func dumpFlash(port *IOWrapper, config *Config) {
 	log.Infof("AddrStr: %s", addrStr)
 	port.Write([]byte(addrStr))
 	readAllDataToWriter(port, outFile)
+	outFile.Close()
 
 	log.Info("Completed dump")
 }
@@ -157,6 +160,8 @@ func main() {
 	file := configureFile(config)
 	port := configureSerial(config)
 	logConfig(config)
+
+	readAllData(port)
 
 	switch config.Command {
 	case "upload":
