@@ -76,7 +76,7 @@ func readAllDataToWriter(port *IOWrapper, out io.Writer) {
 			break
 		}
 
-		if pos := bytes.Index(buf[:n], []byte("Enter Command")); pos != -1 {
+		if pos := bytes.Index(buf[:n], []byte(">")); pos != -1 {
 			out.Write(buf[:pos])
 			break
 		}

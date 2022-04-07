@@ -27,7 +27,7 @@ func Test_AllMethods(t *testing.T) {
 
 
 `)
-		inputBuf := bytes.NewBuffer([]byte("Enter Command:"))
+		inputBuf := bytes.NewBuffer([]byte(">"))
 		infile := bytes.NewBuffer(sentText)
 
 		outputBuf := &bytes.Buffer{}
@@ -36,7 +36,7 @@ func Test_AllMethods(t *testing.T) {
 			Output: outputBuf,
 		}
 
-		Convey("uploadFile() sends the correct data after receiving 'Enter Command'", func() {
+		Convey("uploadFile() sends the correct data after receiving '>'", func() {
 			zero := 0
 			config := &Config{
 				BaseAddr: &zero,
