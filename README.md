@@ -13,6 +13,10 @@ dump, chip erase, and sector erase 32-pin parallel flash chips such as:
  * Am29F040B
  * ... other chips with the same, common pinout
 
+It also supports EEPROM chips of the 28-pin variety, including at least:
+ * AT28C256
+ * AT28C64B
+
 You [can find the software for the hardwire side
 here](https://github.com/relistan/flash-gordon-mcu).
 
@@ -31,25 +35,27 @@ Usage
 usage: flash-gordon-cli [<flags>] <command> [<args> ...]
 
 Flags:
-  --help             Show context-sensitive help (also try --help-long and
-                     --help-man).
-  --serial-port="/dev/cu.usbserial-FTDOMLSO"  
+  --help             Show context-sensitive help (also try --help-long and --help-man).
+  --serial-port="/dev/cu.usbserial-FTDOMLSO"
                      The Serial port name/path to use
   --baud-rate=57600  The baud rate of the serial port
   --use-serial       Serial or stdout?
+  --32pin-flash      Is this a 32 pin flash chip?
+  --28pin-eeprom     Is this a 28 pin EEPROM?
+  --base-addr=0      Base Address to use as starting address
 
 Commands:
   help [<command>...]
     Show help.
 
-  upload [<flags>] [<input-file>]
+  upload <input-file>
     Upload a file to Flash Gordon
 
-  dump
+  dump [<flags>] <output-file>
     Dump the contents of the flash chip
 
   erase [<flags>]
-    Erase the contents of the whole flash chip
+    Erase the whole flash chip contents
 ```
 
 The tool currently supports the above commands and a serial port, to be named
@@ -65,6 +71,32 @@ written into the chip. The software will encode it and upload it to the board.
 I will likely add an `uploadRaw` option to use pre-encoded Intel Hex format
 files. This will then better support assemblers and other tools whose native
 output format is Intel Hex (e.g Avra assembler).
+
+**It defaults to 32pin-flash** mode. Note that if you use that mode against a
+28-pin EEPROM, you can accidentally put the chip into write protection mode.
+So, be careful.
+
+The `dump` command takes an additional argument:
+```
+--length=1024      The number of bytes to dump
+```
+
+Intel Hex Format
+----------------
+
+Dumps from chips are saved in Intel hex format. On the other hand, the software
+handles encoding *to* Intel hex format on the upload, so you may simply pass it
+binaries to upload.
+
+If you wish to decode the Intel hex format files you may use `srecord` or other
+tools. I recommend the simple [`hex2bin` found
+here](http://hex2bin.sourceforge.net/). This is used like:
+
+```
+hex2bin -c output.hex
+```
+
+This will validate checksums and output `output.bin`.
 
 Hardware
 --------
