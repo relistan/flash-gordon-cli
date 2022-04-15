@@ -1,110 +1,21 @@
 package main
 
 import (
-	"encoding/binary"
 	"fmt"
 	"io"
 	"os"
-	"time"
 
+	progressbar "github.com/schollz/progressbar/v3"
 	log "github.com/sirupsen/logrus"
 )
+
+// Hex bytes are 2.375 times the count of original file bytes
+const RatioBinToHex = 2.375
 
 var (
 	// twoToThe16th is used in checking address lengths
 	twoToThe16th = 65536
 )
-
-// uploadFile uploads a file by encoding it as an Intel hex file and streaming
-// it over the serial port as it goes.
-func uploadFile(port *IOWrapper, config *Config, file io.Reader) error {
-	var (
-		addr       int = *config.BaseAddr
-		segment    int = addr % twoToThe16th
-		shouldStop bool
-		buf        []byte = make([]byte, BytesPerLine)
-	)
-
-	readAllData(port)
-
-	log.Info("Sending hex file...")
-
-	// Begin the upload
-	port.Write([]byte("u"))
-
-	// Tell it what kind of chip we're using
-	if *config.Flash32Pin {
-		port.Write([]byte("f"))
-	} else if *config.EEPROM28Pin {
-		port.Write([]byte("e"))
-	}
-
-	out, err := serialReadOutput(port)
-	if err != nil {
-		return err
-	}
-	println(out)
-
-	// Starting address record
-	serialWriteLn(port,
-		formatRecord(0x0, RecTypeExtAddr, []byte{0x0, 0x0}),
-		10*time.Millisecond,
-	)
-	if _, err := serialReadOutput(port); err != nil {
-		return err
-	}
-
-	for !shouldStop {
-		readLen, err := io.ReadFull(file, buf)
-		// This is expected when we hit the end of the file
-		if err == io.ErrUnexpectedEOF || err == io.EOF {
-			shouldStop = true
-		} else if err != nil {
-			return fmt.Errorf("Error on read: %s", err)
-		}
-
-		serialWriteLn(port,
-			formatRecord(addr, RecTypeData, buf[:readLen]),
-			10*time.Millisecond,
-		)
-		addr += readLen
-
-		// Handle more than 16 bits by emitting a new segment record when
-		// we have an address bigger than 16bits.
-		if addr > twoToThe16th-1 {
-			addr -= twoToThe16th - 1
-			segment++
-
-			segmentBytes := make([]byte, 2)
-			binary.BigEndian.PutUint16(segmentBytes, uint16(segment))
-			serialWriteLn(port, formatRecord(0x00, 0x02, segmentBytes), 10*time.Millisecond)
-		}
-		out, err := serialReadOutput(port)
-		if err != nil {
-			return err
-		}
-		println(out)
-	}
-
-	// EOF Record
-	serialWriteLn(port, ":00000001FF\n", 10*time.Millisecond)
-	log.Infof("Completed sending: %d bytes", addr)
-	out, err = serialReadOutput(port)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-	println(out)
-
-	out, err = serialReadOutput(port)
-	if err != nil {
-		return err
-	}
-	println(out)
-	readAllData(port)
-
-	return nil
-}
 
 // dumpFlash dumps the contents of the Flash to the terminal in a human
 // readable format, starting from `start` and running to the end of the Flash.
@@ -119,17 +30,26 @@ func dumpFlash(port *IOWrapper, config *Config) {
 	outFile, err := os.OpenFile(
 		*config.OutputFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644,
 	)
+
 	if err != nil {
 		log.Fatalf("Unable to create output file! '%s'", err)
 	}
+
+	progress := progressbar.DefaultBytes(
+		int64(float64(*config.Length)*RatioBinToHex),
+		"uploading",
+	)
+
+	outFileWithProgress := io.MultiWriter(outFile, progress)
 
 	// Begin the dump - command is 'd' plus 32bit hex base and length
 	addrStr := fmt.Sprintf("d%08X%08X", *config.BaseAddr, *config.Length)
 	log.Infof("AddrStr: %s", addrStr)
 	port.Write([]byte(addrStr))
-	readAllDataToWriter(port, outFile)
+	readAllDataToWriter(port, outFileWithProgress)
 	outFile.Close()
 
+	println()
 	log.Info("Completed dump")
 }
 

@@ -32,7 +32,7 @@ func (s *IOWrapper) Write(p []byte) (n int, err error) {
 }
 
 // serialWriteLn writes a line of data to the serial port, terminating it with a newline
-func serialWriteLn(port io.ReadWriter, data string, delay time.Duration) {
+func serialWriteLn(port io.Writer, data string, delay time.Duration) {
 	var sent int
 
 	for {
